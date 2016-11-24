@@ -1,25 +1,99 @@
 import { Meteor } from 'meteor/meteor';
 import { Accounts, STATES } from 'meteor/std:accounts-ui';
+import { Tracker } from 'meteor/tracker';
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { browserHistory } from 'react-router';
-import { Grid, Row, Col } from 'react-bootstrap';
-import Tracker from 'tracker-component';
+import { Grid, Row, Col, Button } from 'react-bootstrap';
+import { compose } from 'react-komposer';
+import { Loading } from 'react-loading';
+import TrackerComponent from 'tracker-component';
 
-import { GetTicketForm } from '/imports/ui/pages/GetTicketForm.jsx';
+import { GetTicketForm } from '/imports/ui/Pages/GetTicketForm.jsx';
+import { ProfileRegistrationInfo } from '/imports/ui/Pages/RegistrationInfo.jsx';
 
-export class Profile extends Tracker.Component {
+import { Tickets } from '/api/ticket/ticket.jsx';
+
+function getTrackerLoader(reactiveMapper) {
+  return (props, onData, env) => {
+    let trackerCleanup = null;
+    const handler = Tracker.nonreactive(() => {
+      return Tracker.autorun(() => {
+        // assign the custom clean-up function.
+        trackerCleanup = reactiveMapper(props, onData, env);
+      });
+    });
+
+    return () => {
+      if(typeof trackerCleanup === 'function') trackerCleanup();
+      return handler.stop();
+    };
+  };
+}
+
+// usage
+function reactiveMapper(props, onData) {
+  if (Meteor.subscribe('tickets.myTicket').ready()) {
+    const ticket = Tickets.findOne({ owner : Meteor.userId() });
+
+    onData(null, { ticket });
+  };
+}
+
+const options = {
+  loadingHandler: () => (
+    <Grid>
+      <Row>
+        Loading....
+      </Row>
+    </Grid> )
+};
+
+// <Loading type='spinningBubbles' color='#e3e3e3' width='300' height='300' />
+class ProfileConditional extends React.Component {
   constructor(props) {
-   super(props);
-   this.autorun(() => {
+    super(props);
+  }
+
+  render() {
+    if (!(this.props.ticket == null) && !(this.props.ticket == undefined) && this.props.ticket) {
+      return (
+        <Grid>
+          <Row>
+            <Accounts.ui.LoginForm formState={ STATES.PROFILE } />
+            <ProfileRegistrationInfo ticket={ this.props.ticket } />
+            <Button bsStyle="info"> Download Registration Certification (will be avilable soon) </Button>
+          </Row>
+        </Grid>
+      )
+    }
+
+    return (
+      <Grid>
+        <Row>
+          <Accounts.ui.LoginForm formState={ STATES.PROFILE } />
+          <GetTicketForm />
+        </Row>
+      </Grid>
+     )
+  }
+}
+
+const ProfileConditionalContainer = compose(getTrackerLoader(reactiveMapper), options)(ProfileConditional);
+
+export class Profile extends TrackerComponent.Component {
+  constructor(props) {
+    super(props);
+
+    this.autorun(() => {
      this.setState({
        isAuthenticated: Meteor.user()
      });
-   });
+    });
   }
 
   componentWillMount() {
-    // Check that the user is logged in before the component mounts
     if (!this.state.isAuthenticated) {
       browserHistory.push('/signin');
     }
@@ -34,16 +108,7 @@ export class Profile extends Tracker.Component {
 
   render() {
     return (
-      <Grid>
-        <Row>
-          {
-            this.state.isAuthenticated && <div>
-              <Accounts.ui.LoginForm formState={ STATES.PROFILE } />
-              <GetTicketForm />
-            </div>
-          }
-       </Row>
-     </Grid>
+      <ProfileConditionalContainer />
    )
   }
 }
@@ -54,8 +119,13 @@ export class SignIn extends React.Component {
      <Grid>
        <Row>
          <Col xs={12} smOffset={3} sm={6}>
-           <Accounts.ui.LoginForm formState={ STATES.SIGN_IN } />
+            <Accounts.ui.LoginForm formState={ STATES.SIGN_IN } />
+            <ul>
+            <li>If you don't have any account, please register your email</li>
+            <li>If you already have an account, signin with email and click the link on verification email</li>
+            </ul>
          </Col>
+
        </Row>
      </Grid>
    )

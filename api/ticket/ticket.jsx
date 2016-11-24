@@ -1,14 +1,11 @@
-import { Meteor } from 'meteor/meteor';
-import { Mongo } from 'meteor/mongo';
-import { check } from 'meteor/check';
 import { SimpleSchema } from 'meteor/aldeed:simple-schema';
 
-Tickets = new Mongo.Collection('tickets');
+export const Tickets = new Mongo.Collection('tickets');
 
 Meteor.methods({
   'tickets.insertKor'({
     isKorean,
-    email,
+    isPaid,
     agreedKoreanPrivacyPolicy,
     korName,
     mobilePhoneNum,
@@ -17,14 +14,16 @@ Meteor.methods({
     affiliation,
     position,
     advisorName,
-    willPresentPoster }) {
+    willPresentPoster
+    }) {
 
       var mobileRegExp = /^\d{3}-\d{3,4}-\d{4}$/;
       new SimpleSchema({
         createdAt: { type: Date },
-        userId: { type: String, regEx: SimpleSchema.RegEx.Id },
-        isKorean : { type: Boolean },
+        owner: { type: String, regEx: SimpleSchema.RegEx.Id },
         email : { type: String, regEx: SimpleSchema.RegEx.Email },
+        isKorean : { type: Boolean },
+        isPaid : { type: Boolean },
         engLastName : { type: String },
         engFirstName : { type: String },
         affiliation : { type: String  },
@@ -37,19 +36,14 @@ Meteor.methods({
       });
 
       // Make sure the user is logged in before inserting a task
-      if (!this.userId || this.userId == undefined) {
-        throw new Meteor.Error('not-authorized');
+      if (!Meteor.userId() || Meteor.userId() == undefined) {
+        throw new Meteor.Error('not authorized, please sign in');
       }
 
-      var isExistedUser = Tickets.findOne({ owner : Meteor.userId() });
-      var isExistedEmail = Tickets.findOne({ email : email });
+      var isRegistered = Tickets.findOne({ owner : Meteor.userId() });
 
-      if (isExistedUser || !(isExistedUser == undefined)) {
+      if (isRegistered || !(isRegistered == undefined)) {
         throw new Meteor.Error("You've already registered");
-      }
-
-      if (isExistedEmail || !(isExistedEmail == undefined)) {
-        throw new Meteor.Error("Your email address have already registerd");
       }
 
       if (!agreedKoreanPrivacyPolicy) {
@@ -59,8 +53,9 @@ Meteor.methods({
       Tickets.insert({
         createdAt: new Date(),
         owner: Meteor.userId(),
-        isKorean: isKorean,
-        email : email,
+        email : Meteor.user().emails[0].address,
+        isKorean : isKorean,
+        isPaid : isPaid,
         agreedKoreanPrivacyPolicy : agreedKoreanPrivacyPolicy,
         korName : korName,
         mobilePhoneNum : mobilePhoneNum,
@@ -74,7 +69,7 @@ Meteor.methods({
   },
   'tickets.insertNonKor'({
     isKorean,
-    email,
+    isPaid,
     nationality,
     engLastName,
     engFirstName,
@@ -85,40 +80,36 @@ Meteor.methods({
 
       new SimpleSchema({
         createdAt: { type: Date },
-        userId: { type: String, regEx: SimpleSchema.RegEx.Id },
-        isKorean: { type: Boolean },
+        owner: { type: String, regEx: SimpleSchema.RegEx.Id },
         email : { type: String, regEx: SimpleSchema.RegEx.Email },
+        isKorean : { type: Boolean },
+        isPaid : { type: Boolean },
+        nationality : { type: String },
         engLastName : { type: String },
         engFirstName : { type: String },
         affiliation : { type: String  },
         position : { type: String },
         advisorName : { type: String },
-        willPresentPoster : { type: String },
-        nationality: { type: String }
+        willPresentPoster : { type: String }
       });
 
       // Make sure the user is logged in before inserting a task
-      if (!this.userId || this.userId == undefined) {
-        throw new Meteor.Error('not-authorized');
+      if (!Meteor.userId() || Meteor.userId() == undefined) {
+        throw new Meteor.Error('not authorized, please sign in');
       }
 
-      var isExistedUser = Tickets.findOne({ owner : Meteor.userId() });
-      var isExistedEmail = Tickets.findOne({ email : email });
+      var isRegistered = Tickets.findOne({ owner : Meteor.userId() });
 
-      if (isExistedUser || !(isExistedUser == undefined)) {
+      if (isRegistered || !(isRegistered == undefined)) {
         throw new Meteor.Error("You've already registered");
-      }
-
-      if (isExistedEmail || !(isExistedEmail == undefined)) {
-        throw new Meteor.Error("Your email address have already registerd");
       }
 
       Tickets.insert({
         createdAt: new Date(),
-        owner: Meteor.userId(),
-        username: Meteor.users.findOne(this.userId).username,
+        owner : Meteor.userId(),
         email : Meteor.user().emails[0].address,
-        isKorean: isKorean,
+        isKorean : isKorean,
+        isPaid : isPaid,
         nationality : nationality,
         engLastName : engLastName,
         engFirstName : engFirstName,
@@ -128,29 +119,21 @@ Meteor.methods({
         willPresentPoster : willPresentPoster
       });
   },
+  'tickets.findMine'() {
+    const ticket = Tickets.findOne({ owner : Meteor.userId() });
 
-  'tickets.findMine'(userId) {
-    check(userId, String);
-
-    const ticket = Tickets.findOne(userId);
-
-    // Make sure only the task owner can make a task private
-    if (ticket.owner !== Meteor.userId) {
-      throw new Meteor.Error('not-authorized');
-    }
+    return ticket;
   },
 
-  'tickets.remove'(_ticketId) {
-    check(taskId, String);
-
-    Tickets.remove(_ticketId);
-  },
 });
-
 
 if (Meteor.isServer) {
   // This code only runs on the server
-  Meteor.publish('ticket', function ticketsPublication() {
+  Meteor.publish('tickets.myTicket', function () {
+    if (!this.userId || this.userId == null || this.userId == undefined) {
+      throw new Meteor.Error('not authorized, please sign in');
+    }
+
     return Tickets.find({
       owner: this.userId
     });
