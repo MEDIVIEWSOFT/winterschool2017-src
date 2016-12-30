@@ -45,8 +45,8 @@ export const Venue = () => (
             <li>  <a href="https://goo.gl/forms/oCcRUR9NisKRsLnh1">Link for reservation :</a></li>
             <li> 사전등록 및 결제를 하신 분에 한하여 숙소예약이 가능하며, 그렇지 않은 경우 숙소예약이 진행되지 않습니다.</li>
             <li> 신청서를 제출하시고, 반드시 사무국으로부터 숙소예약에 대한 확약 이메일을 받으시기 바랍니다. </li>
-            <li> 숙소 예약 마감 : 2016년 11월 30일 까지</li>
-            <li> 객실예약 취소 안내 : 취소는 2016년 12월 20일 까지만 가능하오니, 신중히 생각하시어 신청하시기 바랍니다.</li>
+            <li> 숙소 예약 마감 : 2016년 12월 8일 까지</li>
+            <li> 객실예약 취소 안내 : 객실 예약 후 취소가 불가하오니, 신중히 생각하시어 신청하시기 바랍니다.</li>
             <li> 문의사항 : a3inverse@gmail.com, 02-2123-6123, 정태욱 </li>
           </ol>
           <h3 className="section-subsubheader">Homepage</h3>
@@ -71,7 +71,7 @@ export const Venue = () => (
         <h2 className="section-subheader">Transportation</h2>
         <p>How to get to Sonofelice (Daemyung Resort, Vivaldi Park)- 추후공지</p>
         <ButtonToolbar>
-          <Button href="http://www.daemyungresort.com/daemyung.front.saupjang.yangpyung.resort_way_map.ds/dmparse.dm?menuNo=04">Korean</Button>
+          <Button href="http://www.daemyungresort.com/daemyung.sn.resort.01_05.ds/dmparse.dm">Korean</Button>
           <Button href="http://www.daemyungresort.com/web/dm_english/html/01vivaldi_english_sub_10.html">English</Button>
           <Button href="http://www.daemyungresort.com/web/dm_china/html/01vivaldi_china_sub_10.html">China</Button>
           <Button href="http://www.daemyungresort.com/web/dm_japan/html/01vivaldi_japan_sub_10.html">Japan</Button>

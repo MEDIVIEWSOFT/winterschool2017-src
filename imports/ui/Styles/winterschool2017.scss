@@ -1,4 +1,7 @@
-html,
+html {
+  height: 100%;
+}
+
 #render-target,
 #render-target>div {
   width: 100%;
@@ -7,14 +10,92 @@ html,
 }
 
 body {
-  width: 100%;
-  height: 100%;
   font-family: 'Open Sans', sans-serif;
   padding-top: 50px;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+#react-root {
+  height: 100%;
+}
+
+[data-reactroot] {
+  height: 100% !important;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.navbar-winter {
+  background-color: #1375a4;
+}
+
+.navbar-winter .navbar-brand {
+  color: #fff;
+  &:hover {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    color: #fff;
+    background-color: #1375a4;
+    border-bottom:#fff 3px solid;
+  }
+}
+
+.navbar-winter .nav {
+  li {
+    a {
+      color: #fff;
+      &:hover {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        color: #fff;
+        background-color: #1375a4;
+        border-bottom:#fff 3px solid;
+      }
+    }
+  }
+  /* http://maths.manchester.ac.uk/siam-ukie/chapters.html */
+  .active {
+    a {
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      color: #fff;
+      background-color: #1375a4;
+      &:focus {
+        color: #fff;
+        background-color: #1375a4;
+      }
+    }
+  }
+  .dropdown {
+    a {
+      color: #fff;
+      background-color: #1375a4;
+      &:focus,
+      &:hover {
+        color: #fff;
+        background-color: #1375a4;
+      }
+    }
+
+    ul {
+      li {
+        a {
+          color: #333;
+          background-color: #fff;
+        }
+      }
+    }
+  }
 }
 
 .section-header {
-  font-size: 26px; 
+  font-size: 26px;
 }
 
 .section-subheader {
@@ -41,15 +122,28 @@ body {
   display: none;
 }
 
-a.anchor {
-    display: block;
-    position: relative;
-    top: -50px;
-    visibility: hidden;
+.pdf-section {
+  margin: 20px;
+}
+.pdf-view {
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
 }
 
-footer {
-  margin-top: 20px;
+a.anchor {
+  display: block;
+  position: relative;
+  top: -50px;
+  visibility: hidden;
+}
+
+.wrapper {
+  flex: 1;
+}
+
+.footer {
 }
 
 address {
